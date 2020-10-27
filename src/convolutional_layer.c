@@ -57,9 +57,39 @@ matrix im2col(image im, int size, int stride)
     // TODO: 5.1
     // Fill in the column matrix with patches from the image
 
+    //1. For each element, we need to get the size x size square of neighbors as each column
+    //2. If we look at boundary elements, we need to add 0 padding if kernel goes off input matrix
+    //3. Each column is actually (size x size)* # of channels, because we must do this process for each channel
 
+    int kernelElems = size*size;
+    int paddingSize = size/2;
+    for(k = 0; k < im.c; k++) { //Each Channel
+        i = -paddingSize; 
+        while(i < im.w + paddingSize) { //Each Column
+            j = -paddingSize;
+            while(j < im.h + paddingSize) { //Each Row
+                j++;
+            }
+            i++;
+        }         
+    }
+    
+    /*
+    col[k*kernelElems + ]
 
-    return col;
+    return col;*/
+
+    /* Loop to get filter elements
+        for(i = row - paddingSize; i < row + paddingSize; i++) {
+            for(j = col - paddingSize; j < col + paddingSize; j++) {
+                if(i < 0 || j < 0 || i > rows || j > cols) {
+                    col[k*kernelElems][row] = 0
+                } else {
+                    col[k*kernelElems][row] =   
+                }
+            }
+        }
+    */
 }
 
 // The reverse of im2col, add elements back into image
