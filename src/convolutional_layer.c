@@ -41,11 +41,13 @@ matrix backward_convolutional_bias(matrix dy, int n)
 }
 
 //Helper Function to get needed pixel from input or 0 if in padding 
-float get_pixel_value(image im, int row, int col, int channel, int pad)
-{
-    row -= pad;
-    col -= pad;
+float get_pixel_value(image im, int row, int col, int channel, int padding)
+{     
+    // apply padding 
+    row -= padding;
+    col -= padding;
 
+    // if the indicies are outside of the bounds of the image, return 0
     if (row < 0 || col < 0 || row >= im.h || col >= im.w) {
         return 0;
     }
