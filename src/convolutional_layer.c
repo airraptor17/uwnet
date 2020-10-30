@@ -40,6 +40,18 @@ matrix backward_convolutional_bias(matrix dy, int n)
     return db;
 }
 
+//Helper Function to get needed pixel from input or 0 if in padding 
+float get_pixel_value(image im, int row, int col, int channel, int pad)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= im.h || col >= im.w) {
+        return 0;
+    }
+    return im.data[col + im.w*(row + im.h*channel)];
+}
+
 // Make a column matrix out of an image
 // image im: image to process
 // int size: kernel size for convolution operation
@@ -50,7 +62,7 @@ matrix im2col(image im, int size, int stride)
     int i, j, k;
     int outw = (im.w-1)/stride + 1;
     int outh = (im.h-1)/stride + 1;
-    int rows = im.c*size*size;
+    int rows = im.c*size*size; 
     int cols = outw * outh;
     matrix col = make_matrix(rows, cols);
 
@@ -63,33 +75,22 @@ matrix im2col(image im, int size, int stride)
 
     int kernelElems = size*size;
     int paddingSize = size/2;
-    for(k = 0; k < im.c; k++) { //Each Channel
-        i = -paddingSize; 
-        while(i < im.w + paddingSize) { //Each Column
-            j = -paddingSize;
-            while(j < im.h + paddingSize) { //Each Row
-                j++;
-            }
-            i++;
-        }         
-    }
-    
-    /*
-    col[k*kernelElems + ]
 
-    return col;*/
-
-    /* Loop to get filter elements
-        for(i = row - paddingSize; i < row + paddingSize; i++) {
-            for(j = col - paddingSize; j < col + paddingSize; j++) {
-                if(i < 0 || j < 0 || i > rows || j > cols) {
-                    col[k*kernelElems][row] = 0
-                } else {
-                    col[k*kernelElems][row] =   
-                }
+    for (k = 0; k < rows; ++k) {
+        int w_offset = k % size;
+        int h_offset = (k / size) % size;
+        int c_im = k / size / size;
+        for (i = 0; i < outh; ++i) {
+            for (j = 0; j < outw; ++j) {
+                int im_row = h_offset + i * stride;
+                int im_col = w_offset + j * stride;
+                int col_index = (k * outh + i) * outw + j;
+                col.data[col_index] = get_pixel_value(im, im_row, im_col, c_im, paddingSize);
             }
         }
-    */
+    }
+
+    return col;
 }
 
 // The reverse of im2col, add elements back into image
