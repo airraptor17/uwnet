@@ -4,6 +4,17 @@
 #include <float.h>
 #include "uwnet.h"
 
+//Helper Function to get needed pixel from input or 0 if in padding 
+float get_pixel_value1(matrix in, int row, int col, int channel, int pad)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row < 0 || col < 0 || row >= in.rows || col >= in.cols) {
+        return 0;
+    }
+    return in.data[col + in.cols*(row + in.rows*channel)];
+}
 
 // Run a maxpool layer on input
 // layer l: pointer to layer to run
@@ -21,9 +32,33 @@ matrix forward_maxpool_layer(layer l, matrix in)
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
     // TODO: 6.1 - iterate over the input and fill in the output with max values
+    int channel, row, col, n, m;
+    //int kernelElems = size*size;
+    int paddingSize = l.size/2;
+    int w_offset = -paddingSize;
+    int h_offset = -paddingSize;
 
-
-
+    for (channel = 0; channel < l.channels; channel++) {
+        for(row = 0; row < outh; row++) {
+            for(col = 0; col < outw; col++) {
+                int col_index = (channel * outh + row) * outw + col;
+                float max = (float)INT32_MIN;
+                int max_i = -1;
+                for(n = 0; n < l.size; ++n){
+                    for(m = 0; m < l.size; ++m){
+                        int cur_h = h_offset + row*l.stride + n;
+                        int cur_w = w_offset + col*l.stride + m;
+                        int index = cur_w + l.width*(cur_h + l.height*l.channels);
+                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width);
+                        float val = (valid != 0) ? in.data[index] : -FLT_MAX;
+                        max_i = (val > max) ? index : max_i;
+                        max   = (val > max) ? val   : max;
+                    }
+                }
+                out.data[col_index] = max;
+            }
+        }
+    }
     return out;
 }
 
