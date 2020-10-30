@@ -93,9 +93,25 @@ matrix im2col(image im, int size, int stride)
                 col.data[col_index] = get_pixel_value(im, im_row, im_col, c_im, paddingSize);
             }
         }
+
+        /*
+        TEST FAILING FOR EVEN SIZED KERNEL. HOW DO WE CENTER IT? 
+        Error: differs at 0, 0.180392 vs 0.000000 so first element is getting buffered
+        */
     }
 
     return col;
+}
+
+//Helper Function to set pixel 
+void set_pixel_value(image im, int row, int col, int channel, int pad, float val)
+{
+    row -= pad;
+    col -= pad;
+
+    if (row >= 0 && col >= 0 && row < im.h && col < im.w) {
+        im.data[col + im.w*(row + im.h*channel)] += val;
+    }
 }
 
 // The reverse of im2col, add elements back into image
@@ -113,8 +129,22 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
 
     // TODO: 5.2
     // Add values into image im from the column matrix
-    
-
+    int paddingSize = size/2;
+    int channels_col = channels * size * size;
+    for (k = 0; k < channels_col; ++k) {
+        int w_offset = k % size;
+        int h_offset = (k / size) % size;
+        int c_im = k / size / size;
+        for (i = 0; i < height; ++i) {
+            for (j = 0; j < outw; ++j) {
+                int im_row = h_offset + i * stride;
+                int im_col = w_offset + j * stride;
+                int col_index = (k * height + i) * outw + j;
+                double val = col.data[col_index];
+                set_pixel_value(im, im_row, im_col, c_im, paddingSize, val);
+            }
+        }
+    }
 
     return im;
 }
