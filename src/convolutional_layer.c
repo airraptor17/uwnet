@@ -124,29 +124,35 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
     int i, j, k;
 
     image im = make_image(width, height, channels);
-    int outw = (im.w-1)/stride + 1;
-    int rows = im.c*size*size;
+    //int outw = (im.w-1)/stride + 1;
+    int rows = channels*size*size;
 
     // TODO: 5.2
     // Add values into image im from the column matrix
     int paddingSize = size/2;
-    int channels_col = channels * size * size;
-    for (k = 0; k < channels_col; ++k) {
+    int outh = (height + 2 * paddingSize - size) / stride + 1;
+    int outw = (width + 2 * paddingSize - size) / stride + 1;
+
+    for (k = 0; k < rows; ++k) {
         int w_offset = k % size;
         int h_offset = (k / size) % size;
         int c_im = k / size / size;
-        for (i = 0; i < height; ++i) {
+        for (i = 0; i < outh; ++i) {
             for (j = 0; j < outw; ++j) {
                 int im_row = h_offset + i * stride;
                 int im_col = w_offset + j * stride;
-                int col_index = (k * height + i) * outw + j;
-                double val = col.data[col_index];
+                int col_index = (k * outh + i) * outw + j;
+                float val = col.data[col_index];
                 set_pixel_value(im, im_row, im_col, c_im, paddingSize, val);
             }
         }
     }
 
     return im;
+
+    /*
+    RUNNING IN TO SEGMENATION FAULT: 11 ERROR. MUST BE ACCESSING SOMETHING WE"RE NOT SUPPOSED TO?
+    */
 }
 
 // Run a convolutional layer on input
