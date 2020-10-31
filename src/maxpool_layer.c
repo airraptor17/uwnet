@@ -19,6 +19,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
     int outh = (l.height-1)/l.stride + 1;
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
+    /*
     printf("l.width: %d\n", l.width);
     printf("l.height: %d\n", l.height);
     printf("l.stride: %d\n", l.stride);
@@ -26,7 +27,9 @@ matrix forward_maxpool_layer(layer l, matrix in)
     printf("outw: %d\n", outw);
     printf("outh: %d\n", outh);
     printf("in.rows: %d\n", in.rows);
+    printf("in.cols: %d\n", in.cols);
     printf("outw*outh*l.channels: %d\n", outw*outh*l.channels);
+    */
 
     // TODO: 6.1 - iterate over the input and fill in the output with max values
     int channel, row, col, n, m, paddingSize;
@@ -47,21 +50,36 @@ matrix forward_maxpool_layer(layer l, matrix in)
                     for(m = 0; m < l.size; ++m){ //for every column in kernel
                         int cur_h = h_offset + row*l.stride + n;
                         int cur_w = w_offset + col*l.stride + m;
-                        int index = cur_w + l.width*(cur_h + l.height*l.channels);
+
+                        //printf("cur_h: %d\n", cur_h);
+                        //printf("cur_w: %d\n", cur_w);
 
                         //1 if cur_h and cur_w point to something inside input, else 0
                         int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width); 
 
                         //if valid = 1, set val to value at index, else set val to min float
-                        float val = (valid != 0) ? in.data[index] : -FLT_MAX;
+                        //float val = (valid != 0) ? in.data[index] : -FLT_MAX;
+                        float val;
+                        if(valid == 1) {
+                            int index = cur_w + l.width*(cur_h + l.height*channel); //THIS COULD BE WRONG
+                            //printf("index: %d\n", index);
+                            val = in.data[index];
+                        } else {
+                            val = -FLT_MAX;
+                        }
 
                         //if val > max, set max to val
-                        max = (val > max) ? val : max;
+                        //max = (val > max) ? val : max;
+                        if(val > max) {
+                            max = val;
+                        }
                     }
                 }
 
                 //After looking at all vals from kernel, set output index to max val seen in kernel location of input
-                out.data[col_index] = max;
+                //printf("col_index: %d\n", col_index);
+                //printf("Max: %f\n", max);
+                out.data[col_index] = max; //max;
             }
         }
     }
