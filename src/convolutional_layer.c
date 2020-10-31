@@ -59,7 +59,7 @@ float get_pixel_value(image im, int row, int col, int channel, int pad)
 // returns: column matrix
 matrix im2col(image im, int size, int stride)
 {
-    int i, j, k; //i = row, j = column, k = channel
+    int i, j, k, paddingSize; //i = row, j = column, k = channel
     int outw = (im.w-1)/stride + 1; //Adds 1 to account for integer division
     int outh = (im.h-1)/stride + 1; //Number of elements we look at for row and column
     int rows = im.c*size*size; 
@@ -73,7 +73,11 @@ matrix im2col(image im, int size, int stride)
     //2. If we look at boundary elements, we need to add 0 padding if kernel goes off input matrix
     //3. Each column is actually (size x size)* # of channels, because we must do this process for each channel
 
-    int paddingSize = size/2;
+    if(size % 2 == 0) { //Even
+        paddingSize = 0;
+    } else { //Odd
+        paddingSize = size/2;
+    }
     for (k = 0; k < rows; ++k) {
         //Offset of width in kernel (should change 0 to n-1 for each of the n rows)
         int w_offset = k % size; 
@@ -121,7 +125,7 @@ void set_pixel_value(image im, int row, int col, int channel, int pad, float val
 // image im: image to add elements back into
 image col2im(int width, int height, int channels, matrix col, int size, int stride)
 {
-    int i, j, k;
+    int i, j, k, paddingSize;
 
     image im = make_image(width, height, channels);
     //int outw = (im.w-1)/stride + 1;
@@ -129,7 +133,11 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
 
     // TODO: 5.2
     // Add values into image im from the column matrix
-    int paddingSize = size/2;
+    if(size % 2 == 0) { //Even
+        paddingSize = 0;
+    } else { //Odd
+        paddingSize = size/2;
+    }
     int outh = (height + 2 * paddingSize - size) / stride + 1;
     int outw = (width + 2 * paddingSize - size) / stride + 1;
 
@@ -151,7 +159,7 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
     return im;
 
     /*
-    RUNNING IN TO SEGMENATION FAULT: 11 ERROR. MUST BE ACCESSING SOMETHING WE"RE NOT SUPPOSED TO?
+    FAILING FOR SIMILAR REASON AS im2col WITH EVEN SIZED KERNEL
     */
 }
 

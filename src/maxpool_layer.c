@@ -4,18 +4,6 @@
 #include <float.h>
 #include "uwnet.h"
 
-//Helper Function to get needed pixel from input or 0 if in padding 
-float get_pixel_value1(matrix in, int row, int col, int channel, int pad)
-{
-    row -= pad;
-    col -= pad;
-
-    if (row < 0 || col < 0 || row >= in.rows || col >= in.cols) {
-        return 0;
-    }
-    return in.data[col + in.cols*(row + in.rows*channel)];
-}
-
 // Run a maxpool layer on input
 // layer l: pointer to layer to run
 // matrix in: input to layer
@@ -31,30 +19,48 @@ matrix forward_maxpool_layer(layer l, matrix in)
     int outh = (l.height-1)/l.stride + 1;
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
+    printf("l.width: %d\n", l.width);
+    printf("l.height: %d\n", l.height);
+    printf("l.stride: %d\n", l.stride);
+    printf("l.size: %d\n", l.size);
+    printf("outw: %d\n", outw);
+    printf("outh: %d\n", outh);
+    printf("in.rows: %d\n", in.rows);
+    printf("outw*outh*l.channels: %d\n", outw*outh*l.channels);
+
     // TODO: 6.1 - iterate over the input and fill in the output with max values
-    int channel, row, col, n, m;
-    //int kernelElems = size*size;
-    int paddingSize = l.size/2;
+    int channel, row, col, n, m, paddingSize;
+    if(l.size % 2 == 0) { //Even
+        paddingSize = 0;
+    } else { //Odd
+        paddingSize = l.size/2;
+    }
     int w_offset = -paddingSize;
     int h_offset = -paddingSize;
 
     for (channel = 0; channel < l.channels; channel++) {
         for(row = 0; row < outh; row++) {
             for(col = 0; col < outw; col++) {
-                int col_index = (channel * outh + row) * outw + col;
-                float max = (float)INT32_MIN;
-                int max_i = -1;
-                for(n = 0; n < l.size; ++n){
-                    for(m = 0; m < l.size; ++m){
+                int col_index = (channel * outh + row) * outw + col; //THIS COULD BE WRONG
+                float max = -FLT_MAX;
+                for(n = 0; n < l.size; ++n){ //for every row in kernel
+                    for(m = 0; m < l.size; ++m){ //for every column in kernel
                         int cur_h = h_offset + row*l.stride + n;
                         int cur_w = w_offset + col*l.stride + m;
                         int index = cur_w + l.width*(cur_h + l.height*l.channels);
-                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width);
+
+                        //1 if cur_h and cur_w point to something inside input, else 0
+                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width); 
+
+                        //if valid = 1, set val to value at index, else set val to min float
                         float val = (valid != 0) ? in.data[index] : -FLT_MAX;
-                        max_i = (val > max) ? index : max_i;
-                        max   = (val > max) ? val   : max;
+
+                        //if val > max, set max to val
+                        max = (val > max) ? val : max;
                     }
                 }
+
+                //After looking at all vals from kernel, set output index to max val seen in kernel location of input
                 out.data[col_index] = max;
             }
         }

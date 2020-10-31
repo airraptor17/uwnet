@@ -4,5 +4,17 @@
     "statusBar.foreground": "#e7e7e7",
     "statusBarItem.hoverBackground": "#7295b1"
   },
-  "peacock.color": "#557c9b"
+  "peacock.color": "#557c9b",
+  "files.associations": {
+    "__hash_table": "c",
+    "__split_buffer": "c",
+    "array": "c",
+    "bitset": "c",
+    "initializer_list": "c",
+    "string": "c",
+    "string_view": "c",
+    "unordered_map": "c",
+    "utility": "c",
+    "vector": "c"
+  }
 }
