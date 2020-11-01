@@ -87,7 +87,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
 // Run a maxpool layer backward
 // layer l: layer to run
-// matrix prev_delta: error term for the previous layer
+// matrix dy: error term for the previous layer
 matrix backward_maxpool_layer(layer l, matrix dy)
 {
     matrix in    = *l.x;

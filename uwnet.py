@@ -2,6 +2,9 @@ import sys, os
 from ctypes import *
 import math
 import random
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 
 lib = CDLL(os.path.join(os.path.dirname(__file__), "libuwnet.so"), RTLD_GLOBAL)
 
