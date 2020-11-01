@@ -19,17 +19,6 @@ matrix forward_maxpool_layer(layer l, matrix in)
     int outh = (l.height-1)/l.stride + 1;
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
-    printf("l.width: %d\n", l.width);
-    printf("l.height: %d\n", l.height);
-    printf("l.stride: %d\n", l.stride);
-    printf("l.size: %d\n", l.size);
-    printf("l.channels: %d\n", l.channels);
-    printf("outw: %d\n", outw);
-    printf("outh: %d\n", outh);
-    printf("in.rows: %d\n", in.rows);
-    printf("in.cols: %d\n", in.cols);
-    printf("outw*outh*l.channels: %d\n", outw*outh*l.channels);
-
     // TODO: 6.1 - iterate over the input and fill in the output with max values
     int channel, row, col, n, m, paddingSize;
     if(l.size % 2 == 0) { //Even
@@ -98,18 +87,6 @@ matrix backward_maxpool_layer(layer l, matrix dy)
     int outh = (l.height-1)/l.stride + 1;
 
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
-
-    printf("l.width: %d\n", l.width);
-    printf("l.height: %d\n", l.height);
-    printf("l.channels: %d\n", l.channels);
-    printf("l.stride: %d\n", l.stride);
-    printf("l.size: %d\n", l.size);
-    printf("outw: %d\n", outw);
-    printf("outh: %d\n", outh);
-    printf("dy.rows: %d\n", dy.rows);
-    printf("dy.cols: %d\n", dy.cols);
-    printf("dx.rows: %d\n", dx.rows);
-    printf("dx.cols: %d\n", dx.cols);
 
     //Going Forward, we found one element: the max, in each kernel (2x2 and 3x3)
     //Going Backwards (I BELIEVE BUT NOT SURE), we do dx = foreach(channel) {in[i] + (max we found for kernel of in[i])*(corresponding error in dy)}
