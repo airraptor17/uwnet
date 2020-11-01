@@ -1,0 +1,103 @@
+---
+layout: default
+---
+        <style>
+        .remark-code{
+            font-size:inherit;
+        }
+        .remark-slide-number{
+            bottom:20px;
+            right:36px;
+            font-size:18px;
+        }
+        .footnote{
+            position:absolute;
+            bottom:20px;
+            font-size:18px;
+        }
+        .remark-slide-content{
+            background-image:url('../figs/bg.png');
+            background-position:top left;
+            background-size: contain;
+            padding:1em 2em 1em 2em;
+            overflow:hidden;
+            font-size:24px;
+        }
+        h1 {
+            margin-block-start: .1em;
+        }
+        img {
+            max-width:100%;
+            vertical-align:middle;
+        }
+        /*figure {max-width:100%}*/
+        .small {font-size:18px}
+        .big {font-size:32px;}
+        /*.mermaidsvg {max-width:40%;}*/
+        .remark-slide-content figure{
+            margin:0;
+        }
+
+        .col30{float:left; width:30%}
+        .col40{float:left; width:40%}
+        .col50{float:left; width:50%}
+        .col60{float:left; width:60%}
+        .col70{float:left; width:70%}
+</style>
+
+<textarea id="source">
+{{ content }}
+</textarea>
+
+<script>
+    MathJax = {
+        skipStartupTypeset: true,
+        tex: {
+            macros: {
+                d: "{\\nabla}",
+            }
+        }
+    };
+</script>
+<script type="text/javascript" id="MathJax-script" async
+  src='https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'>
+</script>
+
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>
+window.onload = function(){
+
+    mermaid.initialize({
+        startOnLoad:false,
+        cloneCssStyles: false,
+        flowchart:{
+            curve:'basis',
+            htmlLabels:true,
+        },
+        theme: 'default',
+        themeVariables:{
+            edgeLabelBackground:'#fff',
+        },
+    });
+
+
+    var slideshow = remark.create({
+        ratio: '16:9',
+        navigation: {scroll: false,},
+    });
+
+    function initSlide() {
+        //console.log(s);
+        var diagrams = document.querySelectorAll('.remark-visible .mermaid');
+        for(var diagram of diagrams){
+            mermaid.init(undefined, diagram);
+        }
+        slide = document.querySelectorAll('.remark-visible');
+        MathJax.typeset(slide);
+    }
+    slideshow.on('afterShowSlide', initSlide);
+    initSlide();
+};
+
+</script>
+

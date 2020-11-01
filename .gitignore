@@ -10,6 +10,7 @@ libuwnet*
 mnist*
 cifar*
 uwnet
+.jekyll-cache
 
 # OS Generated #
 .DS_Store*

@@ -5,8 +5,9 @@
 #include "uwnet.h"
 
 // Add bias terms to a matrix
-// matrix m: partially computed output of layer
+// matrix xw: partially computed output of layer
 // matrix b: bias to add in (should only be one row!)
+// returns: y = wx + b
 matrix forward_convolutional_bias(matrix xw, matrix b)
 {
     assert(b.rows == 1);
@@ -23,9 +24,9 @@ matrix forward_convolutional_bias(matrix xw, matrix b)
     return y;
 }
 
-// Calculate bias updates from a delta matrix
-// matrix delta: error made by the layer
-// matrix db: delta for the biases
+// Calculate dL/db from a dL/dy
+// matrix dy: derivative of loss wrt xw+b, dL/d(xw+b)
+// returns: derivative of loss wrt b, dL/db
 matrix backward_convolutional_bias(matrix dy, int n)
 {
     assert(dy.cols % n == 0);
@@ -197,7 +198,8 @@ matrix forward_convolutional_layer(layer l, matrix in)
 
 // Run a convolutional layer backward
 // layer l: layer to run
-// matrix dy: derivative of loss wrt output dL/dy
+// matrix dy: dL/dy for this layer
+// returns: dL/dx for this layer
 matrix backward_convolutional_layer(layer l, matrix dy)
 {
     matrix in = *l.x;
