@@ -40,7 +40,7 @@ matrix backward_convolutional_bias(matrix dy, int n)
     return db;
 }
 
-//Helper Function to get needed pixel from input or 0 if in padding 
+//Helper Function to get needed pixel from input or 0 if in padding
 float get_pixel_value(image im, int row, int col, int channel, int pad)
 {
     row -= pad;
@@ -62,7 +62,7 @@ matrix im2col(image im, int size, int stride)
     int i, j, k, paddingSize; //i = row, j = column, k = channel
     int outw = (im.w-1)/stride + 1; //Adds 1 to account for integer division
     int outh = (im.h-1)/stride + 1; //Number of elements we look at for row and column
-    int rows = im.c*size*size; 
+    int rows = im.c*size*size;
     int cols = outw * outh; //Total num of pixels we find convolution for after stride
     matrix col = make_matrix(rows, cols);
 
@@ -80,14 +80,14 @@ matrix im2col(image im, int size, int stride)
     }
     for (k = 0; k < rows; ++k) {
         //Offset of width in kernel (should change 0 to n-1 for each of the n rows)
-        int w_offset = k % size; 
+        int w_offset = k % size;
 
         //Offset of height in kernel (should change 0 to n-1 for whole kernel)
-        int h_offset = (k / size) % size; 
+        int h_offset = (k / size) % size;
 
-        // (size / size) = # elements in the kernel. c_im is channel we're looking at 
-        int c_im = k / size / size; 
-        
+        // (size / size) = # elements in the kernel. c_im is channel we're looking at
+        int c_im = k / size / size;
+
         //Looking At Input to get value for output. We run kernel over input and get value of offset
         for (i = 0; i < outh; ++i) {
             for (j = 0; j < outw; ++j) {
@@ -99,7 +99,7 @@ matrix im2col(image im, int size, int stride)
         }
 
         /*
-        TEST FAILING FOR EVEN SIZED KERNEL. HOW DO WE CENTER IT? 
+        TEST FAILING FOR EVEN SIZED KERNEL. HOW DO WE CENTER IT?
         Error: differs at 0, 0.180392 vs 0.000000 so first element is getting buffered
         */
     }
@@ -107,7 +107,7 @@ matrix im2col(image im, int size, int stride)
     return col;
 }
 
-//Helper Function to set pixel 
+//Helper Function to set pixel
 void set_pixel_value(image im, int row, int col, int channel, int pad, float val)
 {
     row -= pad;

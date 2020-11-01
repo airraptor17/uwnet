@@ -43,25 +43,25 @@ matrix forward_maxpool_layer(layer l, matrix in)
     for (channel = 0; channel < l.channels; channel++) {
         for(row = 0; row < outh; row++) {
             for(col = 0; col < outw; col++) {
-                int col_index = (channel * outh + row) * outw + col; //THIS COULD BE WRONG
+                int col_index =  (channel * outh + row) * outw + col;
                 float max = -FLT_MAX;
                 for(n = 0; n < l.size; ++n){ //for every row in kernel
                     for(m = 0; m < l.size; ++m){ //for every column in kernel
                         int cur_h = h_offset + row*l.stride + n;
                         int cur_w = w_offset + col*l.stride + m;
 
-                        //printf("cur_h: %d\n", cur_h);
-                        //printf("cur_w: %d\n", cur_w);
+                        // printf("cur_h: %d\n", cur_h);
+                        // printf("cur_w: %d\n", cur_w);
 
                         //1 if cur_h and cur_w point to something inside input, else 0
-                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width); 
+                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width);
 
                         //if valid = 1, set val to value at index, else set val to min float
                         //float val = (valid != 0) ? in.data[index] : -FLT_MAX;
                         float val;
                         if(valid == 1) {
-                            int index = cur_w + l.width*(cur_h + l.height*channel); //THIS COULD BE WRONG
-                            //printf("index: %d\n", index);
+                            int index = cur_w + l.width*cur_h + l.width*l.height*channel;
+                            // printf("index: %d\n", index);
                             val = in.data[index];
                         } else {
                             val = -FLT_MAX;
@@ -90,11 +90,14 @@ matrix forward_maxpool_layer(layer l, matrix in)
 // matrix prev_delta: error term for the previous layer
 matrix backward_maxpool_layer(layer l, matrix dy)
 {
+
     matrix in    = *l.x;
     matrix dx = make_matrix(dy.rows, l.width*l.height*l.channels);
 
     int outw = (l.width-1)/l.stride + 1;
     int outh = (l.height-1)/l.stride + 1;
+
+    matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
     printf("l.width: %d\n", l.width);
     printf("l.height: %d\n", l.height);
@@ -107,13 +110,78 @@ matrix backward_maxpool_layer(layer l, matrix dy)
     printf("dy.cols: %d\n", dy.cols);
     printf("dx.rows: %d\n", dx.rows);
     printf("dx.cols: %d\n", dx.cols);
-    
+
     //Going Forward, we found one element: the max, in each kernel (2x2 and 3x3)
     //Going Backwards (I BELIEVE BUT NOT SURE), we do dx = foreach(channel) {in[i] + (max we found for kernel of in[i])*(corresponding error in dy)}
 
     // TODO: 6.2 - find the max values in the input again and fill in the
     // corresponding delta with the delta from the output. This should be
     // similar to the forward method in structure.
+
+    // TODO: 6.1 - iterate over the input and fill in the output with max values
+
+    int channel, row, col, n, m, paddingSize;
+    if(l.size % 2 == 0) { //Even
+        paddingSize = 0;
+    } else { //Odd
+        paddingSize = l.size/2;
+    }
+    int w_offset = -paddingSize;
+    int h_offset = -paddingSize;
+
+    for (channel = 0; channel < l.channels; channel++) {
+        for(row = 0; row < outh; row++) {
+            for(col = 0; col < outw; col++) {
+                int col_index =  (channel * outh + row) * outw + col;
+                float max = -FLT_MAX;
+                int max_index = 0;
+                for(n = 0; n < l.size; ++n){ //for every row in kernel
+                    for(m = 0; m < l.size; ++m){ //for every column in kernel
+                        int cur_h = h_offset + row*l.stride + n;
+                        int cur_w = w_offset + col*l.stride + m;
+
+                        // printf("cur_h: %d\n", cur_h);
+                        // printf("cur_w: %d\n", cur_w);
+
+                        //1 if cur_h and cur_w point to something inside input, else 0
+                        int valid = (cur_h >= 0 && cur_h < l.height && cur_w >= 0 && cur_w < l.width);
+
+                        //if valid = 1, set val to value at index, else set val to min float
+                        //float val = (valid != 0) ? in.data[index] : -FLT_MAX;
+                        float val;
+                        int index = cur_w + l.width*cur_h + l.width*l.height*channel;
+                        if (valid == 1) {
+                            // printf("index: %d\n", index);
+                            val = in.data[index];
+                        } else {
+                            val = -FLT_MAX;
+                        }
+
+                        //if val > max, set max to val
+                        //max = (val > max) ? val : max;
+                        if(val > max) {
+                            max = val;
+                            max_index = index;
+                        }
+                    }
+                }
+
+                //After looking at all vals from kernel, set output index to max val seen in kernel location of input
+                //printf("col_index: %d\n", col_index);
+                //printf("Max: %f\n", max);
+                out.data[col_index] = max_index; //max;
+            }
+        }
+    }
+
+    int i;
+    int h = outh;
+    int w = outw;
+    int c = l.channels;
+    for(i = 0; i < h*w*c; ++i){
+        int index = out.data[i];
+        dx.data[index] += dy.data[i];
+    }
 
     return dx;
 }
