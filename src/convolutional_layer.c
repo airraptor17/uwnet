@@ -42,15 +42,14 @@ matrix backward_convolutional_bias(matrix dy, int n)
 }
 
 //Helper Function to get needed pixel from input or 0 if in padding
-float get_pixel_value(image im, int row, int col, int channel, int pad)
+float get_pixel_value(image im, int row, int col, int channel, int paddingSize)
 {
-    row -= pad;
-    col -= pad;
-
-    if (row < 0 || col < 0 || row >= im.h || col >= im.w) {
+    row -= paddingSize;
+    col -= paddingSize;
+    if (row < 0 || row >= im.h || col < 0 || col >= im.w) {
         return 0;
     }
-    return im.data[col + im.w*(row + im.h*channel)];
+    return im.data[im.w*(row + im.h*channel) + col];
 }
 
 // Make a column matrix out of an image
@@ -60,7 +59,7 @@ float get_pixel_value(image im, int row, int col, int channel, int pad)
 // returns: column matrix
 matrix im2col(image im, int size, int stride)
 {
-    int i, j, k, paddingSize; //i = row, j = column, k = channel
+    int i, j, k, paddingSize; //i = row, j = column, k = channel, paddingSize self explanatory
     int outw = (im.w-1)/stride + 1; //Adds 1 to account for integer division
     int outh = (im.h-1)/stride + 1; //Number of elements we look at for row and column
     int rows = im.c*size*size;
@@ -69,53 +68,37 @@ matrix im2col(image im, int size, int stride)
 
     // TODO: 5.1
     // Fill in the column matrix with patches from the image
-
-    //1. For each element, we need to get the size x size square of neighbors as each column
-    //2. If we look at boundary elements, we need to add 0 padding if kernel goes off input matrix
-    //3. Each column is actually (size x size)* # of channels, because we must do this process for each channel
-
     if(size % 2 == 0) { //Even
         paddingSize = 0;
     } else { //Odd
         paddingSize = size/2;
     }
-    for (k = 0; k < rows; ++k) {
-        //Offset of width in kernel (should change 0 to n-1 for each of the n rows)
-        int w_offset = k % size;
 
-        //Offset of height in kernel (should change 0 to n-1 for whole kernel)
-        int h_offset = (k / size) % size;
+    for (k = 0; k < rows; k++) {
+        int kernRowPos = k % size;
+        int kernColPos = (k/size) % size;
+        int curChannel = (k/size)/size;
 
-        // (size / size) = # elements in the kernel. c_im is channel we're looking at
-        int c_im = k / size / size;
-
-        //Looking At Input to get value for output. We run kernel over input and get value of offset
-        for (i = 0; i < outh; ++i) {
-            for (j = 0; j < outw; ++j) {
-                int im_row = h_offset + i * stride;
-                int im_col = w_offset + j * stride;
-                int col_index = (k * outh + i) * outw + j;
-                col.data[col_index] = get_pixel_value(im, im_row, im_col, c_im, paddingSize);
+        for (i = 0; i < outh; i++) {
+            for (j = 0; j < outw; j++) {
+                int imRow = (i*stride) + kernColPos;
+                int imCol = (j*stride) + kernRowPos;
+                int colInx = outw*((k*outh) + i) + j;
+                col.data[colInx] = get_pixel_value(im, imRow, imCol, curChannel, paddingSize);
             }
         }
-
-        /*
-        TEST FAILING FOR EVEN SIZED KERNEL. HOW DO WE CENTER IT?
-        Error: differs at 0, 0.180392 vs 0.000000 so first element is getting buffered
-        */
     }
 
     return col;
 }
 
-//Helper Function to set pixel
-void set_pixel_value(image im, int row, int col, int channel, int pad, float val)
+//Helper Function to set pixel if valid index
+void set_pixel_value(image im, int row, int col, int channel, int paddingSize, float val)
 {
-    row -= pad;
-    col -= pad;
-
-    if (row >= 0 && col >= 0 && row < im.h && col < im.w) {
-        im.data[col + im.w*(row + im.h*channel)] += val;
+    row -= paddingSize;
+    col -= paddingSize;
+    if (row >= 0 && row < im.h && col >= 0 && col < im.w) {
+        im.data[im.w*(row + im.h*channel) + col] += val;
     }
 }
 
@@ -129,7 +112,6 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
     int i, j, k, paddingSize;
 
     image im = make_image(width, height, channels);
-    //int outw = (im.w-1)/stride + 1;
     int rows = channels*size*size;
 
     // TODO: 5.2
@@ -139,29 +121,27 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
     } else { //Odd
         paddingSize = size/2;
     }
-    int outh = (height + 2 * paddingSize - size) / stride + 1;
-    int outw = (width + 2 * paddingSize - size) / stride + 1;
 
-    for (k = 0; k < rows; ++k) {
-        int w_offset = k % size;
-        int h_offset = (k / size) % size;
-        int c_im = k / size / size;
-        for (i = 0; i < outh; ++i) {
-            for (j = 0; j < outw; ++j) {
-                int im_row = h_offset + i * stride;
-                int im_col = w_offset + j * stride;
-                int col_index = (k * outh + i) * outw + j;
-                float val = col.data[col_index];
-                set_pixel_value(im, im_row, im_col, c_im, paddingSize, val);
+    int outh = ((height + (2*paddingSize) - size) / stride) + 1;
+    int outw = ((width + (2*paddingSize) - size) / stride) + 1;
+    
+    for (k = 0; k < rows; k++) {
+        int kernRowPos = k % size;
+        int kernColPos = (k/size) % size;
+        int curChannel = (k/size)/size;
+
+        for (i = 0; i < outh; i++) {
+            for (j = 0; j < outw; j++) {
+                int imRow = (i*stride) + kernColPos;
+                int imCol = (j*stride) + kernRowPos;
+                int colInx = outw*((k*outh) + i) + j;
+                float pixelVal = col.data[colInx];
+                set_pixel_value(im, imRow, imCol, curChannel, paddingSize, pixelVal);
             }
         }
     }
 
     return im;
-
-    /*
-    FAILING FOR SIMILAR REASON AS im2col WITH EVEN SIZED KERNEL
-    */
 }
 
 // Run a convolutional layer on input
