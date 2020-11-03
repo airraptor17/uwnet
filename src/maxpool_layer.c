@@ -10,6 +10,8 @@
 // returns: the result of running the layer
 matrix forward_maxpool_layer(layer l, matrix in)
 {
+
+
     // Saving our input
     // Probably don't change this
     int channel, row, col, kernelRow, kernelCol, paddingSize;
@@ -82,7 +84,7 @@ matrix backward_maxpool_layer(layer l, matrix dy)
     } else { //Odd
         paddingSize = l.size/2;
     }
-    
+
     for (channel = 0; channel < l.channels; channel++) {
         for(row = 0; row < outh; row++) {
             for(col = 0; col < outw; col++) {

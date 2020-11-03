@@ -1,44 +1,46 @@
 from uwnet import *
 
 def conv_net():
-    #Original
-    l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1),
-            make_activation_layer(RELU),
-            make_maxpool_layer(32, 32, 8, 3, 2),
-            make_convolutional_layer(16, 16, 8, 16, 3, 1),
-            make_activation_layer(RELU),
-            make_maxpool_layer(16, 16, 16, 3, 2),
-            make_convolutional_layer(8, 8, 16, 32, 3, 1),
-            make_activation_layer(RELU),
-            make_maxpool_layer(8, 8, 32, 3, 2),
-            make_convolutional_layer(4, 4, 32, 64, 3, 1),
-            make_activation_layer(RELU),
-            make_maxpool_layer(4, 4, 64, 3, 2),
-            make_connected_layer(256, 10),
-            make_activation_layer(SOFTMAX)]
-    #To TEST FOR BETTER Convolutional Architecture (Need to change values and add/remove layers):
-    # l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1),
-    #         make_activation_layer(RELU),
-    #         make_maxpool_layer(32, 32, 8, 3, 2),
-    #         make_convolutional_layer(16, 16, 8, 16, 3, 1),
-    #         make_activation_layer(RELU),
-    #         make_maxpool_layer(16, 16, 16, 3, 2),
-    #         make_convolutional_layer(8, 8, 16, 32, 3, 1),
-    #         make_activation_layer(RELU),
-    #         make_maxpool_layer(8, 8, 32, 3, 2),
-    #         make_convolutional_layer(4, 4, 32, 64, 3, 1),
-    #         make_activation_layer(RELU),
-    #         make_maxpool_layer(4, 4, 64, 3, 2),
-    #         make_connected_layer(256, 10),
-    #         make_activation_layer(SOFTMAX)]
-    
-    #To TEST FOR Connected (Normal DL) Architecture:
-    # l = [   make_connected_layer(32, 32, 3, 8, 3, 1),
-    #         make_activation_layer(LEAKY RELU),
-    #         make_connected_layer(256, 10),
-    #         make_activation_layer(SOFTMAX)]
+  #Original
+  # l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(32, 32, 8, 3, 2),
+  #         make_convolutional_layer(16, 16, 8, 16, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(16, 16, 16, 3, 2),
+  #         make_convolutional_layer(8, 8, 16, 32, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(8, 8, 32, 3, 2),
+  #         make_convolutional_layer(4, 4, 32, 64, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(4, 4, 64, 3, 2),
+  #         make_connected_layer(256, 10),
+  #         make_activation_layer(SOFTMAX)]
 
-    return make_net(l)
+
+  #To TEST FOR BETTER Convolutional Architecture (Need to change values and add/remove layers):
+  l = [   make_convolutional_layer(32, 32, 3, 8, 3, 2),
+    make_activation_layer(RELU),
+    # make_maxpool_layer(32, 32, 8, 3, 2),
+    make_convolutional_layer(16, 16, 8, 16, 3, 2),
+    make_activation_layer(RELU),
+    # make_maxpool_layer(16, 16, 16, 3, 2),
+    make_convolutional_layer(8, 8, 16, 32, 3, 2),
+    make_activation_layer(RELU),
+    # make_maxpool_layer(8, 8, 32, 3, 2),
+    make_convolutional_layer(4, 4, 32, 64, 3, 2),
+    make_activation_layer(RELU),
+    # make_maxpool_layer(4, 4, 64, 3, 2),
+    make_connected_layer(256, 10),
+    make_activation_layer(SOFTMAX)]
+
+  #To TEST FOR Connected (Normal DL) Architecture:
+  # l = [   make_connected_layer(32, 32, 3, 8, 3, 1),
+  #         make_activation_layer(LEAKY RELU),
+  #         make_connected_layer(256, 10),
+  #         make_activation_layer(SOFTMAX)]
+
+  return make_net(l)
 
 print("loading data...")
 train = load_image_classification_data("cifar/cifar.train", "cifar/cifar.labels")
@@ -66,5 +68,5 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # How accurate is the fully connected network vs the convnet when they use similar number of operations?
 # Why are you seeing these results? Speculate based on the information you've gathered and what you know about DL and ML.
 # Your answer:
-# 
+#
 
