@@ -18,7 +18,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
 
     int outh = (l.height-1)/l.stride + 1;
     int outw = (l.width-1)/l.stride + 1;
-
+    
     matrix out = make_matrix(in.rows, outw*outh*l.channels);
 
     // TODO: 6.1 - iterate over the input and fill in the output with max values
@@ -32,7 +32,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
         for(row = 0; row < outh; row++) {
             for(col = 0; col < outw; col++) {
                 int colInx =  (channel * outh + row) * outw + col;
-                float maxPixel = -FLT_MAX;
+                float maxPixel = -1000000000.0;
                 for(kernelRow = 0; kernelRow < l.size; kernelRow++){ //for every row in kernel
                     for(kernelCol = 0; kernelCol < l.size; kernelCol++){ //for every column in kernel
                         int curRow = (row*l.stride + kernelRow) - paddingSize;
@@ -43,7 +43,7 @@ matrix forward_maxpool_layer(layer l, matrix in)
                             int inx = (l.width*curRow) + (l.width*l.height*channel) + curCol;
                             pixelVal = in.data[inx];
                         } else {
-                            pixelVal = -FLT_MAX;
+                            pixelVal = -1000000000.0;
                         }
 
                         if(pixelVal > maxPixel) {
@@ -86,7 +86,7 @@ matrix backward_maxpool_layer(layer l, matrix dy)
         for(row = 0; row < outh; row++) {
             for(col = 0; col < outw; col++) {
                 int colInx =  (channel * outh + row) * outw + col;
-                float maxPixel = -FLT_MAX;
+                float maxPixel = -1000000000.0;
                 int maxInx = 0;
                 for(kernelRow = 0; kernelRow < l.size; kernelRow++){ //for every row in kernel
                     for(kernelCol = 0; kernelCol < l.size; kernelCol++){ //for every column in kernel
@@ -98,7 +98,7 @@ matrix backward_maxpool_layer(layer l, matrix dy)
                         if (curRow >= 0 && curRow < l.height && curCol >= 0 && curCol < l.width) {
                             pixelVal = in.data[inx];
                         } else {
-                            pixelVal = -FLT_MAX;
+                            pixelVal = -1000000000.0;
                         }
 
                         if(pixelVal > maxPixel) {
@@ -113,13 +113,10 @@ matrix backward_maxpool_layer(layer l, matrix dy)
         }
     }
 
-    int i;
-    int h = outh;
-    int w = outw;
-    int c = l.channels;
-    for(i = 0; i < h*w*c; i++){
-        int inx = out.data[i];
-        dx.data[inx] += dy.data[i];
+    int dy_i;
+    for(dy_i = 0; dy_i < outh*outw*l.channels; dy_i++){
+        int dx_i = out.data[dy_i];
+        dx.data[dx_i] += dy.data[dy_i];
     }
 
     return dx;

@@ -2,43 +2,46 @@ from uwnet import *
 
 def conv_net():
   #Original
-  l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1),
-           make_activation_layer(RELU),
-           make_maxpool_layer(32, 32, 8, 3, 2),
-           make_convolutional_layer(16, 16, 8, 16, 3, 1),
-           make_activation_layer(RELU),
-           make_maxpool_layer(16, 16, 16, 3, 2),
-           make_convolutional_layer(8, 8, 16, 32, 3, 1),
-           make_activation_layer(RELU),
-           make_maxpool_layer(8, 8, 32, 3, 2),
-           make_convolutional_layer(4, 4, 32, 64, 3, 1),
-           make_activation_layer(RELU),
-           make_maxpool_layer(4, 4, 64, 3, 2),
-           make_connected_layer(256, 10),
-           make_activation_layer(SOFTMAX)]
-
-
-  #To TEST FOR BETTER Convolutional Architecture (Need to change values and add/remove layers):
-  #l = [   make_convolutional_layer(32, 32, 3, 8, 3, 2),
-  #  make_activation_layer(RELU),
-  #  make_maxpool_layer(32, 32, 8, 3, 2),
-  #  make_convolutional_layer(16, 16, 8, 16, 3, 2),
-  #  make_activation_layer(RELU),
-  #  make_maxpool_layer(16, 16, 16, 3, 2),
-  #  make_convolutional_layer(8, 8, 16, 32, 3, 2),
-  #  make_activation_layer(RELU),
-  #  make_maxpool_layer(8, 8, 32, 3, 2),
-  #  make_convolutional_layer(4, 4, 32, 64, 3, 2),
-  #  make_activation_layer(RELU),
-  #  make_maxpool_layer(4, 4, 64, 3, 2),
-  #  make_connected_layer(256, 10),
-  #  make_activation_layer(SOFTMAX)]
-
-  #To TEST FOR Connected (Normal DL) Architecture:
-  # l = [   make_connected_layer(32, 32, 3, 8, 3, 1),
-  #         make_activation_layer(LEAKY RELU),
+  #l = [   make_convolutional_layer(32, 32, 3, 8, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(32, 32, 8, 3, 2),
+  #         make_convolutional_layer(16, 16, 8, 16, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(16, 16, 16, 3, 2),
+  #         make_convolutional_layer(8, 8, 16, 32, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(8, 8, 32, 3, 2),
+  #         make_convolutional_layer(4, 4, 32, 64, 3, 1),
+  #         make_activation_layer(RELU),
+  #         make_maxpool_layer(4, 4, 64, 3, 2),
   #         make_connected_layer(256, 10),
   #         make_activation_layer(SOFTMAX)]
+
+  l = [   make_convolutional_layer(32, 32, 3, 8, 3, 2), 
+            make_activation_layer(RELU),
+            make_convolutional_layer(16, 16, 8, 16, 3, 2), 
+            make_activation_layer(RELU),
+            make_convolutional_layer(8, 8, 16, 32, 3, 2), 
+            make_activation_layer(RELU),
+            make_convolutional_layer(4, 4, 32, 64, 3, 2), 
+            make_activation_layer(RELU),
+            make_connected_layer(256, 10),
+            make_activation_layer(SOFTMAX)]
+
+  return make_net(l)
+
+def normal_net():
+  #To TEST FOR Connected (Normal DL) Architecture:
+  l = [   make_connected_layer(3072, 72),
+          make_activation_layer(RELU),
+          make_connected_layer(72, 512),
+          make_activation_layer(RELU),
+          make_connected_layer(512, 1104),
+          make_activation_layer(RELU),
+          make_connected_layer(1104, 256),
+          make_activation_layer(RELU),
+          make_connected_layer(256, 10),
+          make_activation_layer(SOFTMAX)]
 
   return make_net(l)
 
@@ -55,7 +58,9 @@ rate = .01
 momentum = .9
 decay = .005
 
-m = conv_net()
+#m = conv_net()
+m = normal_net()
+
 print("training...")
 train_image_classifier(m, train, batch, iters, rate, momentum, decay)
 print("done")
@@ -88,5 +93,15 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # Why are you seeing these results? Speculate based on the information you've gathered and what you know about DL and ML.
 # Your answer:
 #
+# Convolutional Training:
+# Convolutional Testing:
+#
+# Connected Training:
+# Connected Testing:
+#
+# The convolutional network had better results because it reduces unnecessary noise by only focusing on
+# other pixels spatially relevant and not fitting to every other pixel in the image, like the normal connected
+# neural net does. This was expected, since this is in fact why we use convolutional architectures for most
+# image related tasks.
 
 

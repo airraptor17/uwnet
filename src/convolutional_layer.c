@@ -44,8 +44,7 @@ matrix backward_convolutional_bias(matrix dy, int n)
 //Helper Function to get needed pixel from input or 0 if in padding
 float get_pixel_value(image im, int row, int col, int channel, int paddingSize)
 {
-    row -= paddingSize;
-    col -= paddingSize;
+    //Invalid index
     if (row < 0 || row >= im.h || col < 0 || col >= im.w) {
         return 0;
     }
@@ -75,16 +74,16 @@ matrix im2col(image im, int size, int stride)
     }
 
     for (k = 0; k < rows; k++) {
+        int curChannel = (k/size)/size;
         int kernRowPos = k % size;
         int kernColPos = (k/size) % size;
-        int curChannel = (k/size)/size;
 
         for (i = 0; i < outh; i++) {
             for (j = 0; j < outw; j++) {
                 int imRow = (i*stride) + kernColPos;
                 int imCol = (j*stride) + kernRowPos;
                 int colInx = outw*((k*outh) + i) + j;
-                col.data[colInx] = get_pixel_value(im, imRow, imCol, curChannel, paddingSize);
+                col.data[colInx] = get_pixel_value(im, imRow - paddingSize, imCol - paddingSize, curChannel, paddingSize);
             }
         }
     }
@@ -95,8 +94,7 @@ matrix im2col(image im, int size, int stride)
 //Helper Function to set pixel if valid index
 void set_pixel_value(image im, int row, int col, int channel, int paddingSize, float val)
 {
-    row -= paddingSize;
-    col -= paddingSize;
+    //Valid index
     if (row >= 0 && row < im.h && col >= 0 && col < im.w) {
         im.data[im.w*(row + im.h*channel) + col] += val;
     }
@@ -110,7 +108,6 @@ void set_pixel_value(image im, int row, int col, int channel, int paddingSize, f
 image col2im(int width, int height, int channels, matrix col, int size, int stride)
 {
     int i, j, k, paddingSize;
-
     image im = make_image(width, height, channels);
     int rows = channels*size*size;
 
@@ -122,13 +119,12 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
         paddingSize = size/2;
     }
 
-    int outh = ((height + (2*paddingSize) - size) / stride) + 1;
-    int outw = ((width + (2*paddingSize) - size) / stride) + 1;
-    
+    int outh = ((height + (2*paddingSize) - size)/stride) + 1;
+    int outw = ((width + (2*paddingSize) - size)/stride) + 1;
     for (k = 0; k < rows; k++) {
+        int curChannel = (k/size)/size;
         int kernRowPos = k % size;
         int kernColPos = (k/size) % size;
-        int curChannel = (k/size)/size;
 
         for (i = 0; i < outh; i++) {
             for (j = 0; j < outw; j++) {
@@ -136,7 +132,7 @@ image col2im(int width, int height, int channels, matrix col, int size, int stri
                 int imCol = (j*stride) + kernRowPos;
                 int colInx = outw*((k*outh) + i) + j;
                 float pixelVal = col.data[colInx];
-                set_pixel_value(im, imRow, imCol, curChannel, paddingSize, pixelVal);
+                set_pixel_value(im, imRow - paddingSize, imCol - paddingSize, curChannel, paddingSize, pixelVal);
             }
         }
     }
