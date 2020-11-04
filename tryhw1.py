@@ -32,15 +32,16 @@ def conv_net():
 
 def normal_net():
   #To TEST FOR Connected (Normal DL) Architecture:
-  l = [   make_connected_layer(3072, 72),
-          make_activation_layer(RELU),
-          make_connected_layer(72, 512),
-          make_activation_layer(RELU),
-          make_connected_layer(512, 1104),
-          make_activation_layer(RELU),
-          make_connected_layer(1104, 256),
-          make_activation_layer(RELU),
-          make_connected_layer(256, 10),
+  #Must be 1108480 operations
+  l = [   make_connected_layer(3072, 108), #1
+          make_activation_layer(LRELU),
+          make_connected_layer(108, 512), #2
+          make_activation_layer(LRELU),
+          make_connected_layer(512, 1104), #3
+          make_activation_layer(LRELU),
+          make_connected_layer(1104, 256), #4
+          make_activation_layer(LRELU),
+          make_connected_layer(256, 10), #5
           make_activation_layer(SOFTMAX)]
 
   return make_net(l)
@@ -93,11 +94,11 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # Why are you seeing these results? Speculate based on the information you've gathered and what you know about DL and ML.
 # Your answer:
 #
-# Convolutional Training:
-# Convolutional Testing:
+# Convolutional Training: ~0.64
+# Convolutional Testing: ~0.59
 #
-# Connected Training:
-# Connected Testing:
+# Connected Training: ~0.59
+# Connected Testing: ~0.52
 #
 # The convolutional network had better results because it reduces unnecessary noise by only focusing on
 # other pixels spatially relevant and not fitting to every other pixel in the image, like the normal connected
