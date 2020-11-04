@@ -10,8 +10,6 @@
 // returns: the result of running the layer
 matrix forward_maxpool_layer(layer l, matrix in)
 {
-
-
     // Saving our input
     // Probably don't change this
     int channel, row, col, kernelRow, kernelCol, paddingSize;
@@ -39,10 +37,9 @@ matrix forward_maxpool_layer(layer l, matrix in)
                     for(kernelCol = 0; kernelCol < l.size; kernelCol++){ //for every column in kernel
                         int curRow = (row*l.stride + kernelRow) - paddingSize;
                         int curCol = (col*l.stride + kernelCol) - paddingSize;
-                        int valid = (curRow >= 0 && curRow < l.height && curCol >= 0 && curCol < l.width);
-
+                        
                         float pixelVal;
-                        if(valid == 1) {
+                        if(curRow >= 0 && curRow < l.height && curCol >= 0 && curCol < l.width) {
                             int inx = (l.width*curRow) + (l.width*l.height*channel) + curCol;
                             pixelVal = in.data[inx];
                         } else {
@@ -95,11 +92,10 @@ matrix backward_maxpool_layer(layer l, matrix dy)
                     for(kernelCol = 0; kernelCol < l.size; kernelCol++){ //for every column in kernel
                         int curRow = (row*l.stride + kernelRow) - paddingSize;
                         int curCol = (col*l.stride + kernelCol) - paddingSize;
-                        int valid = (curRow >= 0 && curRow < l.height && curCol >= 0 && curCol < l.width);
 
                         float pixelVal;
                         int inx = (l.width*curRow) + (l.width*l.height*channel) + curCol;
-                        if (valid == 1) {
+                        if (curRow >= 0 && curRow < l.height && curCol >= 0 && curCol < l.width) {
                             pixelVal = in.data[inx];
                         } else {
                             pixelVal = -FLT_MAX;
