@@ -43,6 +43,7 @@ layer make_connected_layer(int inputs, int outputs);
 layer make_activation_layer(ACTIVATION activation);
 layer make_convolutional_layer(int w, int h, int c, int filters, int size, int stride);
 layer make_maxpool_layer(int w, int h, int c, int size, int stride);
+layer make_batchnorm_layer(int groups);
 
 
 typedef struct {

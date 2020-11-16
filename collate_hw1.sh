@@ -16,5 +16,5 @@ prepare hw1.ipynb
 
 tar cvzf hw1.tar.gz submit
 rm -rf submit/
-echo "Done. Please upload submit.tar.gz to Canvas."
+echo "Done. Please upload hw1.tar.gz to Canvas."
 

@@ -9,6 +9,13 @@
 #include "image.h"
 #include "test.h"
 #include "args.h"
+// Forward declare for tests
+matrix mean(matrix x, int groups);
+matrix variance(matrix x, matrix m, int groups);
+matrix normalize(matrix x, matrix m, matrix v, int groups);
+matrix delta_mean(matrix d, matrix v);
+matrix delta_variance(matrix d, matrix x, matrix m, matrix v);
+matrix delta_batch_norm(matrix d, matrix dm, matrix dv, matrix m, matrix v, matrix x);
 
 int tests_total = 0;
 int tests_fail = 0;
@@ -310,6 +317,84 @@ void test_maxpool_layer()
     free_layer(max_l3);
 }
 
+void test_batchnorm_layer()
+{
+    matrix a = load_matrix("data/test/a.matrix");
+    matrix y = load_matrix("data/test/y.matrix");
+
+    matrix mu_a   = mean(a, 64);
+    matrix mu_a_s = mean(a, 8);
+    matrix sig_a   =  variance(a, mu_a, 64);
+    matrix sig_a_s =  variance(a, mu_a_s, 8);
+    matrix norm_a = normalize(a, mu_a, sig_a, 64);
+    matrix norm_a_s = normalize(a, mu_a_s, sig_a_s, 8);
+
+    matrix truth_mu_a = load_matrix("data/test/mu_a.matrix");
+    matrix truth_mu_a_s = load_matrix("data/test/mu_a_s.matrix");
+    matrix truth_sig_a = load_matrix("data/test/sig_a.matrix");
+    matrix truth_sig_a_s = load_matrix("data/test/sig_a_s.matrix");
+    matrix truth_norm_a = load_matrix("data/test/norm_a.matrix");
+    matrix truth_norm_a_s = load_matrix("data/test/norm_a_s.matrix");
+
+    TEST(same_matrix(truth_mu_a,   mu_a));
+    TEST(same_matrix(truth_mu_a_s, mu_a_s));
+    TEST(same_matrix(truth_sig_a,   sig_a));
+    TEST(same_matrix(truth_sig_a_s, sig_a_s));
+    TEST(same_matrix(truth_norm_a,   norm_a));
+    TEST(same_matrix(truth_norm_a_s, norm_a_s));
+
+    
+
+    matrix dm = delta_mean(y, sig_a);
+    matrix dm_s = delta_mean(y, sig_a_s);
+
+    matrix dv = delta_variance(y, a, mu_a, sig_a);
+    matrix dv_s = delta_variance(y, a, mu_a_s, sig_a_s);
+
+    matrix dbn = delta_batch_norm(y, dm, dv, mu_a, sig_a, a);
+    matrix dbn_s = delta_batch_norm(y, dm_s, dv_s, mu_a_s, sig_a_s, a);
+
+    matrix truth_dm   = load_matrix("data/test/dm.matrix");
+    matrix truth_dm_s = load_matrix("data/test/dm_s.matrix");
+    matrix truth_dv   = load_matrix("data/test/dv.matrix");
+    matrix truth_dv_s = load_matrix("data/test/dv_s.matrix");
+    matrix truth_dbn   = load_matrix("data/test/dbn.matrix");
+    matrix truth_dbn_s = load_matrix("data/test/dbn_s.matrix");
+    TEST(same_matrix(truth_dm,   dm));
+    TEST(same_matrix(truth_dm_s, dm_s));
+    TEST(same_matrix(truth_dv,   dv));
+    TEST(same_matrix(truth_dv_s, dv_s));
+    TEST(same_matrix(truth_dbn,   dbn));
+    TEST(same_matrix(truth_dbn_s, dbn_s));
+
+    free_matrix(truth_mu_a);
+    free_matrix(truth_mu_a_s);
+    free_matrix(truth_sig_a);
+    free_matrix(truth_sig_a_s);
+    free_matrix(truth_norm_a);
+    free_matrix(truth_norm_a_s);
+    free_matrix(mu_a);
+    free_matrix(mu_a_s);
+    free_matrix(sig_a);
+    free_matrix(sig_a_s);
+    free_matrix(norm_a);
+    free_matrix(norm_a_s);
+    free_matrix(truth_dm);
+    free_matrix(truth_dm_s);
+    free_matrix(truth_dv);
+    free_matrix(truth_dv_s);
+    free_matrix(truth_dbn);
+    free_matrix(truth_dbn_s);
+    free_matrix(dm);
+    free_matrix(dm_s);
+    free_matrix(dv);
+    free_matrix(dv_s);
+    free_matrix(dbn);
+    free_matrix(dbn_s);
+    free_matrix(a);
+    free_matrix(y);
+}
+
 void make_matrix_test()
 {
     srand(1);
@@ -418,7 +503,6 @@ void make_matrix_test()
 
 
 
-
     // im2col tests
 
     //image im = load_image("data/test/dog.jpg"); 
@@ -443,7 +527,45 @@ void make_matrix_test()
     col2mat2.cols = col2im_res2.w*col2im_res2.h;
     col2mat2.data = col2im_res2.data;
     save_matrix(col2mat2, "data/test/col2mat2.matrix");
+
+
+
+    // Batch norm test
+
+    matrix mu_a   = mean(a, 64);
+    matrix mu_a_s = mean(a, 8);
+
+    matrix sig_a   =  variance(a, mu_a, 64);
+    matrix sig_a_s =  variance(a, mu_a_s, 8);
+
+    matrix norm_a = normalize(a, mu_a, sig_a, 64);
+    matrix norm_a_s = normalize(a, mu_a_s, sig_a_s, 8);
+
+    save_matrix(mu_a, "data/test/mu_a.matrix");
+    save_matrix(mu_a_s, "data/test/mu_a_s.matrix");
+    save_matrix(sig_a, "data/test/sig_a.matrix");
+    save_matrix(sig_a_s, "data/test/sig_a_s.matrix");
+    save_matrix(norm_a, "data/test/norm_a.matrix");
+    save_matrix(norm_a_s, "data/test/norm_a_s.matrix");
+
+    matrix dm = delta_mean(y, sig_a);
+    matrix dm_s = delta_mean(y, sig_a_s);
+
+    save_matrix(dm, "data/test/dm.matrix");
+    save_matrix(dm_s, "data/test/dm_s.matrix");
+
+    matrix dv = delta_variance(y, a, mu_a, sig_a);
+    matrix dv_s = delta_variance(y, a, mu_a_s, sig_a_s);
+
+    save_matrix(dv, "data/test/dv.matrix");
+    save_matrix(dv_s, "data/test/dv_s.matrix");
+
+    matrix dbn = delta_batch_norm(y, dm, dv, mu_a, sig_a, a);
+    matrix dbn_s = delta_batch_norm(y, dm_s, dv_s, mu_a_s, sig_a_s, a);
+    save_matrix(dbn, "data/test/dbn.matrix");
+    save_matrix(dbn_s, "data/test/dbn_s.matrix");
 }
+
 
 void test_matrix_speed()
 {
@@ -477,6 +599,7 @@ void run_tests()
     test_im2col();
     test_col2im();
     test_maxpool_layer();
+    test_batchnorm_layer();
 
     printf("%d tests, %d passed, %d failed\n", tests_total, tests_total-tests_fail, tests_fail);
 }

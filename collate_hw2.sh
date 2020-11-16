@@ -9,13 +9,11 @@ prepare () {
 }
 
 echo "Creating tarball..."
-prepare src/matrix.c
-prepare src/activation_layer.c
-prepare src/connected_layer.c
-prepare tryhw0.py
-prepare hw0.ipynb
+prepare src/batchnorm_layer.c
+prepare tryhw2.py
+prepare hw2.ipynb
 
-tar cvzf hw0.tar.gz submit
+tar cvzf hw2.tar.gz submit
 rm -rf submit/
-echo "Done. Please upload hw0.tar.gz to Canvas."
+echo "Done. Please upload hw2.tar.gz to Canvas."
 

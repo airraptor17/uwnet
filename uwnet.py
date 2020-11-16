@@ -170,10 +170,9 @@ make_maxpool_layer = lib.make_maxpool_layer
 make_maxpool_layer.argtypes = [c_int, c_int, c_int, c_int, c_int]
 make_maxpool_layer.restype = LAYER
 
-#def make_convolutional_layer(w, h, c, filters, size, stride, activation, batchnorm = 0):
-#    l = make_convolutional_layer_lib(w, h, c, filters, size, stride, activation)
-#    l.batchnorm = batchnorm
-#    return l
+make_batchnorm_layer = lib.make_batchnorm_layer
+make_batchnorm_layer.argtypes = [c_int]
+make_batchnorm_layer.restype = LAYER
 
 save_weights_lib = lib.save_weights
 save_weights_lib.argtypes = [NET, c_char_p]
