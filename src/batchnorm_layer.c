@@ -51,10 +51,11 @@ matrix normalize(matrix x, matrix m, matrix v, int groups)
     // TODO: 7.2 - Normalize x
     float eps = 0.00001f;
     int n = x.cols / groups;
+
     int i, j;
     for(i = 0; i < x.rows; ++i){
         for(j = 0; j < x.cols; ++j){
-            norm.data[i*x.cols + j] += ((x.data[i*x.cols + j] - m.data[j/n])/sqrt(v.data[j/n] + eps));
+            norm.data[i*x.cols + j] += ((x.data[i*x.cols + j] - m.data[j/n])/sqrtf(v.data[j/n] + eps));
         }
     }
     return norm;
@@ -111,7 +112,7 @@ matrix delta_mean(matrix d, matrix v)
 
     for(i = 0; i < d.rows; ++i){
         for(j = 0; j < d.cols; ++j){
-            dm.data[j/n] += (d.data[i*d.cols + j] * (-1/sqrt(v.data[j/n] + eps)));
+            dm.data[j/n] += (d.data[i*d.cols + j] * (-1/sqrtf(v.data[j/n] + eps)));
         }
     }
 
@@ -165,6 +166,7 @@ matrix delta_variance(matrix d, matrix x, matrix m, matrix v)
 matrix delta_batch_norm(matrix d, matrix dm, matrix dv, matrix m, matrix v, matrix x)
 {
     matrix dx = make_matrix(d.rows, d.cols);
+    
     /*
     printf("d.rows: %d, d.cols: %d\n", d.rows, d.cols);
     printf("dm.rows: %d, dm.cols: %d\n", dm.rows, dm.cols);
@@ -172,28 +174,29 @@ matrix delta_batch_norm(matrix d, matrix dm, matrix dv, matrix m, matrix v, matr
     printf("m.rows: %d, m.cols: %d\n", m.rows, m.cols);
     printf("v.rows: %d, v.cols: %d\n", v.rows, v.cols);
     printf("x.rows: %d, x.cols: %d\n", x.rows, x.cols);
-    
-
+    */
+   
     // TODO 7.5 - Calculate dL/dx
     float eps = 0.00001f;
     int i, j;
     int groups = m.cols;
-    int n = d.cols / groups;
-
+    int n = x.cols / groups;
+    int total = x.rows * n;
+   
     for(i = 0; i < x.rows; ++i){
         for(j = 0; j < x.cols; ++j){
-            float dL_dy = d.data[i*d.cols + j];
-            float var_val = v.data[j/n] + eps;
-            float x_val = x.data[i*d.cols + j];
+            float dL_dy = d.data[i*x.cols + j];
+            float x_val = x.data[i*x.cols + j];
             float mu_val = m.data[j/n];
-            float dL_ds2 = dv.data[j/n];
             float dL_dmu = dm.data[j/n];
+            float var_val1 = v.data[j/n];
+            float var_val = sqrtf(v.data[j/n] + eps);
+            float dL_ds2 = dv.data[j/n];
 
-            float temp = (dL_dy/sqrt(var_val)) + (dL_ds2 * (2 * (x_val - mu_val))/n) + (dL_dmu/n);
-            dv.data[j/n] += temp;
+            float temp = (dL_dy/var_val) + (dL_ds2 * 2 * (x_val - mu_val)/total) + (dL_dmu/total);
+            dx.data[i*d.cols + j] = temp;
         }
     }
-    */
     return dx;
 }
 
