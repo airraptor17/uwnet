@@ -87,7 +87,7 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # Convolutional Testing: ~0.23
 #
 # Convolutional w/ BatchNorm Training: ~0.45
-# Convolutional w/ BatchNorm: ~0.44
+# Convolutional w/ BatchNorm Testing: ~0.44
 
 # Convolutional w/ Batch norm had a higher accuracy.
 
