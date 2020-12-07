@@ -17,13 +17,13 @@ def conv_net():
   #         make_connected_layer(256, 10),
   #         make_activation_layer(SOFTMAX)]
 
-  l = [   make_convolutional_layer(32, 32, 3, 8, 3, 2), 
+  l = [   make_convolutional_layer(32, 32, 3, 8, 3, 2),
             make_activation_layer(RELU),
-            make_convolutional_layer(16, 16, 8, 16, 3, 2), 
+            make_convolutional_layer(16, 16, 8, 16, 3, 2),
             make_activation_layer(RELU),
-            make_convolutional_layer(8, 8, 16, 32, 3, 2), 
+            make_convolutional_layer(8, 8, 16, 32, 3, 2),
             make_activation_layer(RELU),
-            make_convolutional_layer(4, 4, 32, 64, 3, 2), 
+            make_convolutional_layer(4, 4, 32, 64, 3, 2),
             make_activation_layer(RELU),
             make_connected_layer(256, 10),
             make_activation_layer(SOFTMAX)]
@@ -78,13 +78,13 @@ print("test accuracy:     %f", accuracy_net(m, test))
 # one matmul going forward in a layer which only occurs in the convolutional and connected layers.
 #
 # make_convolutional_layer(32, 32, 3, 8, 3, 1),
-# (3 * 3 * 3) * (32 * 32) * 8 = 221184 
+# (3 * 3 * 3) * (32 * 32) * 8 = 221184
 # make_convolutional_layer(16, 16, 8, 16, 3, 1),
-# (8 * 3 * 3) * (16 * 16) * 16 = 294912 
+# (8 * 3 * 3) * (16 * 16) * 16 = 294912
 # make_convolutional_layer(8, 8, 16, 32, 3, 1),
-# (16 * 3 * 3) * (8 * 8) * 32 = 294912 
+# (16 * 3 * 3) * (8 * 8) * 32 = 294912
 # make_convolutional_layer(4, 4, 32, 64, 3, 1),
-# (32 * 3 * 3) * (4 * 4) * 64 = 294912 
+# (32 * 3 * 3) * (4 * 4) * 64 = 294912
 # make_connected_layer(256, 10)
 # This is just 256 * 10 * 1 = 2560
 #
